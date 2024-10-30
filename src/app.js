@@ -14,7 +14,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.send("User created successfully!");
   } catch (err) {
-    res.status(400).send("User creation failed!");
+    res.status(400).send("User creation failed!" + err);
   }
 });
 
@@ -59,10 +59,12 @@ app.patch("/user", async (req, res) => {
     const emailId = req.body.emailId;
     const data = req.body;
     console.log(data);
-    await User.findOneAndUpdate({ emailId: emailId }, data);
+    await User.findOneAndUpdate({ emailId: emailId }, data, {
+      runValidators: true,
+    });
     res.send("User updated Successfully");
   } catch (err) {
-    res.status(400).send("something went wrong!");
+    res.status(400).send("something went wrong!" + err);
   }
 });
 
