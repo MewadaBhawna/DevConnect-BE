@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("enter a  valid email address");
+        }
+      },
     },
     password: {
       type: String,
@@ -26,6 +32,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minLength: 3,
       maxLength: 255,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Password is week");
+        }
+      },
     },
     gender: {
       type: String,
@@ -34,6 +45,10 @@ const userSchema = new mongoose.Schema(
           throw new Error("enter gender is invalid");
         }
       },
+    },
+    Skills: {
+      type: [String],
+      maxLength: 10,
     },
   },
   {

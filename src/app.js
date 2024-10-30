@@ -54,11 +54,17 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
+app.patch("/user/:emailId", async (req, res) => {
   try {
-    const emailId = req.body.emailId;
+    const emailId = req.params?.emailId;
     const data = req.body;
-    console.log(data);
+    const ALLOWED_FIELDS = ["firstName", "lastName", "password", "gender"];
+    const IS_ALLOWED = Object.keys(ALLOWED_FIELDS).every((key) =>
+      ALLOWED_FIELDS.includes(key)
+    );
+    if (IS_ALLOWED) {
+      throw new Error("enter value fields not valid");
+    }
     await User.findOneAndUpdate({ emailId: emailId }, data, {
       runValidators: true,
     });
