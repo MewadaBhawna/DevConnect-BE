@@ -2,6 +2,8 @@ const express = require("express");
 const { adminAuth } = require("./middleware/adminAuth");
 const connectDatabase = require("./config/database");
 const User = require("./models/user");
+const { signupValidation } = require("./utils/signupValidation");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -9,12 +11,44 @@ const app = express();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
   try {
+    const { firstName, lastName, emailId, password } = req.body;
+    // validate input data
+    signupValidation(req.body);
+    //encrypt password
+    const hashedPassword = await bcrypt.hash(password, 10); //save data
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
+    });
+    console.log(firstName);
     await user.save();
-    res.send("User created successfully!");
-  } catch (err) {
-    res.status(400).send("User creation failed!" + err);
+    res.send("User Created Successfully!!");
+  } catch (error) {
+    res.status(400).send("Something went wrong! Error: " + error);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error(
+        "Invalid Credentials. Sign up to create your new acccount!"
+      );
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error(
+        "Invalid Credentials. Sign up to create your new acccount!"
+      );
+    }
+    res.send("Login Successfully!");
+  } catch (error) {
+    res.status(400).send("Something went wrong! Error: " + error);
   }
 });
 
